@@ -186,19 +186,4 @@ def truncate_and_write_to_db_sql():
 
     write_to_db_sql(cur_connect)
 if __name__ == '__main__':
-    # # Save_Pages_To_Files(2,'NAME:SQL разработчик')
-    # # Читаем переменные из env
-    # load_dotenv()
-    #
-    # cur_driver = os.environ['DRIVER']
-    # cur_db = os.environ['DATABASE']
-    # cur_server = os.environ['SERVER']
-    # cur_connect = {'driver': cur_driver, 'db': cur_db, 'server': cur_server}
-    # connection_string = get_connection_string(cur_connect, 1)  # os.environ['CONNECTION_ODBC_STR']
-    # print(connection_string)
-    #
-    # f_truncate('dbo.t_vacancies, dbo.t_skills, dbo.t_salary',
-    #            connection_string)
-    #
-    # write_to_db_sql(cur_connect)
     truncate_and_write_to_db_sql()

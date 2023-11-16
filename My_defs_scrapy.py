@@ -8,7 +8,7 @@ import json
 import time
 
 # Модуль для работы с операционной системой. Будем использовать для работы с файлами
-import os
+import os, shutil
 
 
 def getPage(page=0, str_find='NAME:аналитик'):
@@ -32,7 +32,11 @@ def getPage(page=0, str_find='NAME:аналитик'):
     return data
 
 def Save_Pages_To_Files(pages:int, str_find='NAME:аналитик' ):
-
+    # Очищаем целевые папки для записывания новых файлов с данными
+    myfolder = './docs/pagination'
+    cleaner_folder(myfolder)
+    myfolder = './docs/vacancies'
+    cleaner_folder(myfolder)
     # Считываем первые 2000 вакансий
     for page in range(0,pages):
        print(page)
@@ -94,7 +98,25 @@ def create_vacancies_files(count_vac_max=3):
 
     print('Вакансии собраны')
 
+
+def cleaner_folder(folder: str):
+    ''' Очищает папку от файлов и папок в ней '''
+    i = 0
+    j = 0
+    for filename in os.listdir(folder):
+        file_path = os.path.join(folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+                i += 1
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+                j += 1
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+    print(f'Удалено {i} файлов и {j} папок')
+
 if __name__ == '__main__':
-    # Save_Pages_To_Files(2,'NAME:SQL разработчик')
+    Save_Pages_To_Files(2,'NAME:SQL разработчик')
     create_vacancies_files(200)
 
