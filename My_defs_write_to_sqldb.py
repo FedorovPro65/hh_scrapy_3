@@ -1,6 +1,8 @@
-# Библиотека для анализа данных, представляющая данные в табличном виде называемом DataFrame
-# Вся мощь данной библиотеки нам здесь не понадобиться, с ее помощью мы положим
-# данные в БД. Можно было бы написать простые insert-ы
+# Модуль представляет данные из json файлов в табличном виде называемом DataFrame.
+# Создадим ODBC соединение на основе параметров считанных из engine файла.
+# Положим данные в таблицы БД, предварительно их очистив.
+# Запустим процедуры на сервере для обработки таблиц на SQL сервере.
+
 import pandas as pd
 import numpy as np
 import json
@@ -30,6 +32,19 @@ def f_truncate(tables_for_truncate: str, connection_string: str):
 
         print(f'f_truncate {tables_for_truncate} end')
 
+def f_exec_proc(list_proc_for_exec: str, connection_string: str):
+    ''' запускает процедуры на SQL Server '''
+    # tables_for_truncate = 'dbo.t_vacancies, dbo.t_skills, dbo.t_salary'
+    tables = list_proc_for_exec.split(',')
+    # replace with your SQL Server connection string
+    # connection_string = 'Driver={ODBC Driver 17 for SQL Server};Server=NOUTHPFPD22\SS16_2;Database=Test2;Trusted_Connection=yes;'
+
+    with pyodbc.connect(connection_string) as conn:
+        cursor = conn.cursor()
+        for table in tables:
+            cursor.execute(table)
+
+        print(f'f_exec_proc {list_proc_for_exec} end')
 
 def get_connection_string(cur_connect: dict, type_odbc=0):
     # instantiate the variables needed to establish a connection
@@ -154,11 +169,11 @@ def write_to_db_sql(cur_connect:str):
     df.to_sql('t_vacancies', conn, schema='dbo', if_exists='append', index=False)
 
     # Тоже самое, но для таблицы skills
-    df = pd.DataFrame({'vacancy': skills_vac, 'skill': skills_name})
+    df = pd.DataFrame({'vacancy_id': skills_vac, 'skill': skills_name})
     df.to_sql('t_skills', conn, schema='dbo', if_exists='append', index=False)
 
     # Тоже самое, но для таблицы skills
-    df = pd.DataFrame({'vac_id': salary_vac_id, 'salary_cur': salary_cur, 'salary_from': salary_from
+    df = pd.DataFrame({'vacancy_id': salary_vac_id, 'salary_cur': salary_cur, 'salary_from': salary_from
                           , 'salary_to': salary_to, 'Netto_brutto': salary_netto_brutto})
     df.to_sql('t_salary', conn, schema='dbo', if_exists='append', index=False)
 
@@ -178,12 +193,22 @@ def truncate_and_write_to_db_sql():
     cur_db = os.environ['DATABASE']
     cur_server = os.environ['SERVER']
     cur_connect = {'driver': cur_driver, 'db': cur_db, 'server': cur_server}
+
+    # Формируем строку соединения ODBC с БД на SQL SERVER
     connection_string = get_connection_string(cur_connect, 1)  # os.environ['CONNECTION_ODBC_STR']
     print(connection_string)
 
+    # Очищаем таблицы перед загрузкой данных
     f_truncate('dbo.t_vacancies, dbo.t_skills, dbo.t_salary',
                connection_string)
 
+    # Записываем данные из json файлов в таблицы.
     write_to_db_sql(cur_connect)
+
+    # Запускаем процедуры на сервере для записи новых данных в архивные таблицы.
+    f_exec_proc('dbo.add_t_vacancies_arh, dbo.add_t_salary_arh, dbo.add_t_skills_arh',
+                connection_string)
+
 if __name__ == '__main__':
     truncate_and_write_to_db_sql()
+

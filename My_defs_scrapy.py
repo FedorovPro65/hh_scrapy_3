@@ -23,7 +23,7 @@ def getPage(page=0, str_find='NAME:аналитик'):
         'text': str_find,  # Текст фильтра. В имени должно быть слово "SQL разработчик"
         'area': 1,  # Поиск осуществляется по вакансиям города Москва
         'page': page,  # Индекс страницы поиска на HH
-        'per_page': 3  # Кол-во вакансий на 1 странице
+        'per_page': 40  # Кол-во вакансий на 1 странице
     }
 
     req = requests.get('https://api.hh.ru/vacancies', params)  # Посылаем запрос к API
@@ -117,6 +117,6 @@ def cleaner_folder(folder: str):
     print(f'Удалено {i} файлов и {j} папок')
 
 if __name__ == '__main__':
-    Save_Pages_To_Files(2,'NAME:SQL разработчик')
+    Save_Pages_To_Files(5,'NAME:SQL разработчик')
     create_vacancies_files(200)
 

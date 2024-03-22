@@ -19,3 +19,4 @@ if __name__ == '__main__':
     create_vacancies_files(200)
     truncate_and_write_to_db_sql()
 
+
